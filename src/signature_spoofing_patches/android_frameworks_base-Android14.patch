@@ -1,33 +1,28 @@
 diff --git a/core/api/current.txt b/core/api/current.txt
-index 9b5316fb..1e7f6273 100644
+index 62980ed5bd69..54a95bb5fe6e 100644
 --- a/core/api/current.txt
 +++ b/core/api/current.txt
-@@ -95,6 +95,7 @@ package android {
+@@ -98,6 +98,7 @@ package android {
      field public static final String EXECUTE_APP_ACTION = "android.permission.EXECUTE_APP_ACTION";
      field public static final String EXPAND_STATUS_BAR = "android.permission.EXPAND_STATUS_BAR";
      field public static final String FACTORY_TEST = "android.permission.FACTORY_TEST";
-+    field public static final String FAKE_PACKAGE_SIGNATURE = "android.permission.FAKE_PACKAGE_SIGNATURE";
++    field @FlaggedApi("android.permission-group.FAKE_PACKAGE_SIGNATURE") public static final String FAKE_PACKAGE_SIGNATURE = "android.permission.FAKE_PACKAGE_SIGNATURE";
      field public static final String FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE";
      field public static final String FOREGROUND_SERVICE_CAMERA = "android.permission.FOREGROUND_SERVICE_CAMERA";
      field public static final String FOREGROUND_SERVICE_CONNECTED_DEVICE = "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE";
-@@ -328,6 +329,7 @@ package android {
+@@ -342,6 +343,7 @@ package android {
      field public static final String CALL_LOG = "android.permission-group.CALL_LOG";
      field public static final String CAMERA = "android.permission-group.CAMERA";
      field public static final String CONTACTS = "android.permission-group.CONTACTS";
-+    field public static final String FAKE_PACKAGE = "android.permission-group.FAKE_PACKAGE";
++    field @FlaggedApi("android.permission-group.FAKE_PACKAGE") public static final String FAKE_PACKAGE = "android.permission-group.FAKE_PACKAGE";
      field public static final String LOCATION = "android.permission-group.LOCATION";
      field public static final String MICROPHONE = "android.permission-group.MICROPHONE";
      field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
-@@ -61892,4 +61894,3 @@ package org.apache.http.params {
-   }
- 
- }
--
 diff --git a/core/res/AndroidManifest.xml b/core/res/AndroidManifest.xml
-index 22591641..cede3930 100644
+index abe4b2942ca2..ee2a99b9bf02 100644
 --- a/core/res/AndroidManifest.xml
 +++ b/core/res/AndroidManifest.xml
-@@ -4318,6 +4318,26 @@
+@@ -4481,6 +4481,26 @@
          android:description="@string/permdesc_getPackageSize"
          android:protectionLevel="normal" />
  
@@ -55,10 +50,10 @@ index 22591641..cede3930 100644
           {@link android.content.pm.PackageManager#addPackageToPreferred}
           for details. -->
 diff --git a/core/res/res/values/strings.xml b/core/res/res/values/strings.xml
-index 4596ca74..a5ce5eb2 100644
+index 59066eb83f1c..87cfe4e97602 100644
 --- a/core/res/res/values/strings.xml
 +++ b/core/res/res/values/strings.xml
-@@ -993,6 +993,19 @@
+@@ -1014,6 +1014,19 @@
      <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
  
      <!--  Permissions -->
@@ -79,10 +74,10 @@ index 4596ca74..a5ce5eb2 100644
      <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
      <string name="permlab_statusBar">disable or modify status bar</string>
 diff --git a/services/core/java/com/android/server/pm/ComputerEngine.java b/services/core/java/com/android/server/pm/ComputerEngine.java
-index d8cbe9d5..827a2061 100644
+index 7d00436857a5..c2bfb3287692 100644
 --- a/services/core/java/com/android/server/pm/ComputerEngine.java
 +++ b/services/core/java/com/android/server/pm/ComputerEngine.java
-@@ -1512,6 +1512,29 @@ public class ComputerEngine implements Computer {
+@@ -1514,6 +1514,29 @@ public class ComputerEngine implements Computer {
          return Optional.of(fakeSignature);
      }
  
@@ -112,7 +107,7 @@ index d8cbe9d5..827a2061 100644
      public final PackageInfo generatePackageInfo(PackageStateInternal ps,
              @PackageManager.PackageInfoFlagsBits long flags, int userId) {
          if (!mUserManager.exists(userId)) return null;
-@@ -1545,13 +1568,15 @@ public class ComputerEngine implements Computer {
+@@ -1547,13 +1570,15 @@ public class ComputerEngine implements Computer {
                      || ArrayUtils.isEmpty(p.getPermissions())) ? Collections.emptySet()
                      : mPermissionManager.getInstalledPermissions(ps.getPackageName());
              // Compute granted permissions only if package has requested permissions
